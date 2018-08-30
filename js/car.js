@@ -156,6 +156,7 @@ Car.prototype.tick = function () {
     var collisionSide = this.physical();
     var correctedSpeed;
     if (collisionSide > -1) {
+        console.log("发生碰撞");
         correctedSpeed = this.collision(speedX, speedZ, collisionSide);
 
         speedX = correctedSpeed.vx * 5;

@@ -68,7 +68,7 @@ export default class aduio {
         if (!this.status) return;
         let target = this.audiopool[type];
         if (!target) {
-            console.log('create is ',type);
+            console.log('create is ', type);
             target = this._createAudio(this._url[type]);
             this.audiopool[type] = target
         }
@@ -77,5 +77,19 @@ export default class aduio {
             target.play();
         }
         target.play();
+    }
+
+    // 音效控制
+    control = (type) => {
+        let self = this;
+        if (type === "close") {
+            this.status = false;
+            if (!!self.audiopool["bgm"]) {
+                console.log("停止背景音乐");
+                self.audiopool["bgm"].stop();
+            }
+        } else if (type === "open") {
+            this.status = true;
+        }
     }
 }

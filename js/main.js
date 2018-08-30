@@ -4,9 +4,11 @@ import './base/OBJLoader.js'
 
 import index from './view/index.js'
 import logind from './view/loading.js'
+import gameOver from './view/gameOver.js'
+import game2D from './view/game2D.js'
+
 import { Car } from './car.js'
 import audio from './audio.js'
-import ranking from './view/rankingView.js'
 
 GameGlobal.THREE = _THREE;
 
@@ -22,15 +24,21 @@ mainCanvas.scale(ratio, ratio);
 
 export default class Main {
     constructor() {
-        this.gameStatus = false; // 游戏状态
         this.canvasPool = [];// 画布池
 
         this.indexUI = new index(this);
         this.logindUI = new logind(this);
-        this.ranking = new ranking(this);
+        this.gameoverUI = new gameOver(this);
+        this.game2DUI = new game2D(this);
         this.audio = new audio(this);
 
-        this.renderPool();
+        // 游戏状态变量
+        this.status = {
+            Totaltime: 180000, // 总时间
+            hp: 100,// 生命值
+        }
+
+        this.renderPool();// canvas渲染逻辑
 
         this.init();
 
@@ -118,10 +126,9 @@ export default class Main {
                 // 资源加载完毕
                 self.logindUI.delete();
                 self.indexUI.render();
-                self.canvasPool = [self.gameCanvas,self.indexUI.canvas];// 更新画布池
+                self.canvasPool = [self.gameCanvas, self.indexUI.canvas];// 更新画布池
                 self.audio.onBGM();
                 self.update();
-                self.event();
 
             }, function () {
                 console.log('progress');
@@ -133,7 +140,7 @@ export default class Main {
         // 汽车模型
         this.car = new Car({
             scene: self.scene,
-            cb: ()=>{self.ground = new Ground()},
+            cb: () => { self.ground = new Ground() },
             light: self.pointLight,
             camera: self.camera,
             ctx: self
@@ -141,7 +148,7 @@ export default class Main {
 
     }
 
-    // 游戏canvas 渲染
+    // 游戏主渲染逻辑
     update() {
         requestAnimationFrame(this.update.bind(this));
         this.car.tick();
@@ -156,30 +163,27 @@ export default class Main {
         GameGlobal.audio = this.audio;
     }
 
-    // 游戏控制
-    event = () => {
-        let car = this.car;
-        wx.onTouchStart(res => {
-            if (!this.gameStatus) return;
-            if (res.changedTouches[0].clientX >= window.innerWidth / 2) {
-                car.run = true;
-                car.rSpeed = -0.02;
-            } else {
-                car.run = true;
-                car.rSpeed = 0.02;
-            }
-        })
+    // 游戏开始
+    gamestart = () => {
+        this.indexUI.delete();
+        this.game2DUI.render();
+        this.canvasPool = [this.gameCanvas, this.game2DUI.canvas];
+    }
 
-        wx.onTouchEnd(res => {
-            if (!this.gameStatus) return;
-            if (res.changedTouches[0].clientX >= window.innerWidth / 2) {
-                car.run = false;
-                car.rSpeed = 0;
-            } else {
-                car.run = false;
-                car.rSpeed = 0;
-            }
-        })
+    // 游戏结束
+    gameover = (score) => {
+        if (!!score) wx.postMessage({ type: 1, data: { score: Number(score) }, style: { top: screenHeight / 4, left: screenWidth / 4 } })
+
+        this.gameoverUI.over();
+        this.game2DUI.delete();
+
+        this.canvasPool = [this.gameCanvas, this.gameoverUI.canvas, sharedCanvas];// 更新画布池
+    }
+
+    // 游戏控制
+    control = (type) => {
+        let car = this.car;
+
     }
 
 }

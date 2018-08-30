@@ -155,6 +155,21 @@ export default class indexUI {
                     endX: screenWidth - 70 + 50,
                     endY: 50 + screenHeight / 1.2
                 }
+            },
+            close_btn: {
+                url: "https://shop.yunfanshidai.com/xcxht/racing/assets/close.png",
+                style: {
+                    x: screenWidth / 2 - 25,
+                    y: screenHeight / 1.3,
+                    w: 50,
+                    h: 50
+                },
+                range: {
+                    startX: screenWidth / 2 - 25,
+                    startY: screenHeight / 1.3,
+                    endX: screenWidth / 2 - 25 + 50,
+                    endY: 50 + screenHeight / 1.3
+                }
             }
         };
         this._logindIMG();// 预加载图片资源
@@ -213,6 +228,7 @@ export default class indexUI {
     }
 
     event = () => {
+        let self = this;
         if (!!this._eventCallback) {
             wx.offTouchStart(this._eventCallback);
             console.log("清空index触摸事件");
@@ -222,24 +238,28 @@ export default class indexUI {
             let x = e.changedTouches[0].clientX;
             let y = e.changedTouches[0].clientY;
 
-            // play
+            // 开始游戏
             this.__Range({ x, y }, this._URL.play.range, () => {
-                this.delete();
-                this.parent.canvasPool = [this.parent.gameCanvas];
-                this.parent.gameStatus = true;
+                this.parent.gamestart();
             })
 
-            // rank
+            // 排行榜
             this.__Range({ x, y }, this._URL.rank.range, () => {
-                console.log('rank');
-                wx.postMessage({type:2});
-                this.parent.canvasPool = [this.parent.indexUI.canvas,sharedCanvas];
-                this.parent.gameStatus = false;
+                wx.postMessage({ type: 2, style: { top: 50 ,left: screenWidth/2} });
+                this.parent.canvasPool = [this.parent.gameCanvas, this.parent.indexUI.canvas, sharedCanvas];
+
+                // 禁用其他按钮事件
+                wx.offTouchStart(this._eventCallback);
+
+                // 显示close按钮
+                this._renderIMG('close_btn');
+
+                // 监听close按钮事件
+                wx.onTouchStart(self.close_callback);
             })
 
-            // share
+            // 分享
             this.__Range({ x, y }, this._URL.share.range, () => {
-                console.log('share');
                 shareBTN();
             })
 
@@ -253,8 +273,33 @@ export default class indexUI {
                 console.log('appearance');
             })
 
+            // audio
+            this.__Range({ x, y }, this._URL.vioce_open.range, () => {
+                console.log('audio');
+                let status = !self.parent.audio.status;
+                if(status){
+                    self.parent.audio.control("open");
+                    self.parent.audio.onBGM();
+                    self.render();
+                }else{
+                    self.parent.audio.control("close");
+                    this._renderIMG('vioce_close');
+                }
+            })
+
         }
         wx.onTouchStart(this._eventCallback)
+    }
+
+    // 排行榜关闭按钮
+    close_callback = (e) => {
+        let x = e.changedTouches[0].clientX;
+        let y = e.changedTouches[0].clientY;
+        this.__Range({ x, y }, this._URL.close_btn.range, () => {
+            this.parent.canvasPool = [this.parent.gameCanvas, this.parent.indexUI.canvas];
+            wx.offTouchStart(this.close_callback);
+            this.render();
+        })
     }
 
     // 矩阵检测
