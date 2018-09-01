@@ -244,7 +244,7 @@ export default class indexUI {
 
             // 排行榜
             this.__Range({ x, y }, this._URL.rank.range, () => {
-                wx.postMessage({ type: 2, style: { top: 50 ,left: screenWidth/2} });
+                wx.postMessage({ type: 2, style: { top: 50 ,left: 320} });
                 this.parent.canvasPool = [this.parent.gameCanvas, this.parent.indexUI.canvas, sharedCanvas];
 
                 // 禁用其他按钮事件

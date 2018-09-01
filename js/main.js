@@ -202,10 +202,13 @@ export default class Main {
         let car = this.car;
         if (type === "left") {
             car.rSpeed = 0.02;
+            car.brake();
         } else if (type === "right") {
             car.rSpeed = -0.02;
+            car.brake();
         } else if (type === "stop") {
             car.rSpeed = 0;
+            car.cancelBrake();
         }
     }
 
