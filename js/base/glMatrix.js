@@ -25,7 +25,7 @@
  *    3. This notice may not be removed or altered from any source
  *    distribution.
  */
-import THREE from '../../js/libs/_Global.js'
+import THREE from '../../js/libs/three.js'
 
 // Fallback for systems that don't support WebGL
 if(typeof Float32Array != 'undefined') {

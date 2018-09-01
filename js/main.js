@@ -1,4 +1,4 @@
-import _THREE from './libs/_Global.js'
+import * as THREE from './libs/three.js'
 import './base/MTLLoader.js'
 import './base/OBJLoader.js'
 
@@ -7,10 +7,8 @@ import logind from './view/loading.js'
 import gameOver from './view/gameOver.js'
 import game2D from './view/game2D.js'
 
-import { Car } from './car.js'
+import Car from './car.js'
 import audio from './audio.js'
-
-GameGlobal.THREE = _THREE;
 
 let screenHeight = window.innerHeight;
 let screenWidth = window.innerWidth;
@@ -31,12 +29,6 @@ export default class Main {
         this.gameoverUI = new gameOver(this);
         this.game2DUI = new game2D(this);
         this.audio = new audio(this);
-
-        // 游戏状态变量
-        this.status = {
-            Totaltime: 180000, // 总时间
-            hp: 100,// 生命值
-        }
 
         this.renderPool();// canvas渲染逻辑
 
@@ -60,7 +52,7 @@ export default class Main {
         this.logindUI.update("正在创建3D场景...");
         this.canvasPool.push(this.logindUI.canvas);
 
-        // 场景
+        // 场景与天空盒
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.CubeTextureLoader()
             .setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/images/skybox/')
@@ -84,7 +76,10 @@ export default class Main {
         var context = this.gameCanvas.getContext('webgl');
 
         // 渲染器
-        var webGLRenderer = new THREE.WebGLRenderer(context);
+        var webGLRenderer = new THREE.WebGLRenderer({
+            canvas: this.gameCanvas,
+            context: context
+        });
         webGLRenderer.setPixelRatio(window.devicePixelRatio);
         webGLRenderer.setSize(screenWidth, screenHeight);
         webGLRenderer.setClearColor(0x0077ec, 1);
@@ -92,14 +87,14 @@ export default class Main {
         webGLRenderer.shadowMap.type = THREE.PCFShadowMap;
         this.webGLRenderer = webGLRenderer;
 
-        // 平行光
+        // 点光源
         var pointLight = new THREE.PointLight(0xccbbaa, 1, 0, 0);
         this.pointLight = pointLight;
         pointLight.position.set(-10, 20, -20);
         pointLight.castShadow = true;
         this.scene.add(pointLight);
 
-        // 点光源
+        // 环境光
         this.light = new THREE.AmbientLight(0xccbbaa, 0.1);
         this.scene.add(this.light);
 
@@ -126,7 +121,9 @@ export default class Main {
                 // 资源加载完毕
                 self.logindUI.delete();
                 self.indexUI.render();
+
                 self.canvasPool = [self.gameCanvas, self.indexUI.canvas];// 更新画布池
+
                 self.audio.onBGM();
                 self.update();
 
@@ -150,9 +147,9 @@ export default class Main {
 
     // 游戏主渲染逻辑
     update() {
-        requestAnimationFrame(this.update.bind(this));
         this.car.tick();
         this.webGLRenderer.render(this.scene, this.camera);
+        requestAnimationFrame(this.update.bind(this), this.gameCanvas);
     }
 
     global() {
@@ -168,6 +165,22 @@ export default class Main {
         this.indexUI.delete();
         this.game2DUI.render();
         this.canvasPool = [this.gameCanvas, this.game2DUI.canvas];
+        let m = 0, s = 0, ms = 0;
+        if (!!this.GameTime) window.clearInterval(this.GameTime);
+        // 游戏时间与速度
+        this.GameTime = window.setInterval(() => {
+            ms += 1;
+            if (ms >= 100) {
+                ms = 0;
+                s += 1;
+            }
+            if (s >= 60) {
+                s = 0;
+                m += 1;
+            }
+            ctx.game2DUI.update(`${m}:${s}:${ms}`, 12);
+        }, 10);
+        this.car.run = true;// 启动汽车
     }
 
     // 游戏结束
@@ -177,13 +190,23 @@ export default class Main {
         this.gameoverUI.over();
         this.game2DUI.delete();
 
+        this.car.run = false;// 停止汽车
+
         this.canvasPool = [this.gameCanvas, this.gameoverUI.canvas, sharedCanvas];// 更新画布池
+
+        if (!!this.GameTime) window.clearInterval(this.GameTime);
     }
 
     // 游戏控制
     control = (type) => {
         let car = this.car;
-
+        if (type === "left") {
+            car.rSpeed = 0.02;
+        } else if (type === "right") {
+            car.rSpeed = -0.02;
+        } else if (type === "stop") {
+            car.rSpeed = 0;
+        }
     }
 
 }

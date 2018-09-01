@@ -1,8 +1,8 @@
 /**
  * @author mrdoob / http://mrdoob.com/
  */
-import THREE from '../../js/libs/_Global.js'
-THREE.OBJLoader = function ( manager ) {
+import * as THREE from '../../js/libs/three.js'
+THREE["OBJLoader"] = function ( manager ) {
 
     this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
 

@@ -8,7 +8,7 @@
 		"newFeature": true
 	},
 	"compileType": "game",
-	"libVersion": "game",
+	"libVersion": "2.2.4",
 	"appid": "wx760383b2be44c4c7",
 	"projectname": "car",
 	"condition": {

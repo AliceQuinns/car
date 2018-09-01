@@ -59,24 +59,65 @@ export default class game2D {
         this._renderIMG('btnLeft');
         this._renderIMG('btnRight');
 
+        this.update("00:00:18",12);
+
         this.event();
     }
 
-    event = () => {
-        wx.offTouchStart(this.click);
-        wx.onTouchStart(this.click);
+    // 仪表盘
+    update(time, speed) {
+        let ctx = this._content;
+        ctx.clearRect(0, 0, screenWidth, screenHeight / 3);
+
+        // 时间
+        ctx.save();
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillRect(10, 10, 150, 30);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "italic small-caps bold 16px arial";
+        ctx.textAlign = "left";
+        ctx.fillText(`时间:  ${time}`, 20, 30);
+        ctx.restore();
+
+        // 速度
+        ctx.save();
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillRect(10, 50, 150, 30);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "italic small-caps bold 16px arial";
+        ctx.textAlign = "left";
+        ctx.fillText(`速度:  ${speed} km/s`, 20, 70);
+        ctx.restore();
     }
 
+    event = () => {
+        // 鼠标按下
+        wx.offTouchStart(this.click);
+        wx.onTouchStart(this.click);
+
+        // 鼠标松开
+        wx.offTouchEnd(this.stop)
+        wx.onTouchEnd(this.stop)
+    }
+
+    // 虚拟按钮
     click = (e) => {
         let x = e.changedTouches[0].clientX;
         let y = e.changedTouches[0].clientY;
 
         this.__Range({ x, y }, this._URL.btnLeft.range, () => {
             console.log("左");
+            this.Superior.control("left");
         })
         this.__Range({ x, y }, this._URL.btnRight.range, () => {
             console.log("右");
+            this.Superior.control("right");
         })
+    }
+
+    stop = (e) => {
+        console.log("松开");
+        this.Superior.control("stop");
     }
 
     // 矩阵检测

@@ -102,6 +102,13 @@ export default class gameOverUI {
         this.__Range({ x, y }, this._URL.start.range, () => {
             this.delete();
             this.Superior.canvasPool = [this.Superior.gameCanvas, this.Superior.indexUI.canvas];// 更新画布池
+            
+            this.Superior.car.car.position.set(0,-5,-20);
+            this.Superior.car.car.rotation.set(0,0,0);
+            this.Superior.camera.position.set(0,0,0);
+            this.Superior.camera.rotation.set(0,0,0);
+            this.Superior.pointLight.position.set(-10,20,-20);
+            
             this.Superior.indexUI.render();
             this.Superior.audio.onBGM();
         })

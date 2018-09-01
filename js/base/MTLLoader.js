@@ -3,8 +3,8 @@
  *
  * @author angelxuanchang
  */
-import THREE from '../../js/libs/_Global.js'
-THREE.MTLLoader = function ( manager ) {
+import * as THREE from '../../js/libs/three.js'
+THREE["MTLLoader"] = function ( manager ) {
 
     this.manager = ( manager !== undefined ) ? manager : THREE.DefaultLoadingManager;
 

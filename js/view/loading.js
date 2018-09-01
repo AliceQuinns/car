@@ -59,6 +59,5 @@ export default class LodingUI {
 
     delete() {
         this._content.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio);
-        console.log("关闭loading界面");
     }
 }

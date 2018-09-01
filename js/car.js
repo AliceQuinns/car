@@ -1,7 +1,10 @@
 import outside from './base/outside.js'
+import * as THREE from './libs/three.js'
 let camera;
+let pad;
 
-export function Car(params) {
+export default function Car(params) {
+    pad = params.ctx;
     var self = this;
     var car;
     var mtlLoader = new THREE.MTLLoader();
@@ -47,14 +50,14 @@ export function Car(params) {
             params.scene.add(car);
             self.car = car;
 
-            params.cb();
+            params.cb();// 加载赛道
 
         }, function (xhr) {
             console.log('progress');
         }, function () {
             console.log('error');
         });
-    }, (xhr) => { console.log(xhr) }, (err) => { console.log(err) });
+    });
 
 
     // 渲染右车轮
@@ -157,6 +160,7 @@ Car.prototype.tick = function () {
     var correctedSpeed;
     if (collisionSide > -1) {
         console.log("发生碰撞");
+        pad.gameover(12);
         correctedSpeed = this.collision(speedX, speedZ, collisionSide);
 
         speedX = correctedSpeed.vx * 5;
@@ -204,7 +208,6 @@ Car.prototype.cancelBrake = function () {
     this.isBrake = false;
 };
 
-// 
 Car.prototype.physical = function () {
     var i = 0;
 
@@ -257,7 +260,7 @@ Car.prototype.collision = function (sx, sz, side) {
 };
 
 // 车轮
-export function Wheel(params) {
+function Wheel(params) {
     var mtlLoader = new THREE.MTLLoader();
     var self = this;
 
@@ -279,6 +282,7 @@ export function Wheel(params) {
 
             object.position.set(params.offsetX, 0, params.offsetZ);
 
+
             params.scene.add(wrapper);
             self.wheel = object;
             self.wrapper = wrapper;
@@ -292,11 +296,11 @@ export function Wheel(params) {
 
 }
 
-export function isLeft(a, b, c) {
+function isLeft(a, b, c) {
     return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) < 0;
 }
 
-export function getBounceVector(obj, w) {
+function getBounceVector(obj, w) {
     var len = Math.sqrt(w.vx * w.vx + w.vy * w.vy);
     w.dx = w.vx / len;
     w.dy = w.vy / len;
@@ -326,7 +330,7 @@ export function getBounceVector(obj, w) {
 }
 
 
-export function getProjectVector(u, dx, dy) {
+function getProjectVector(u, dx, dy) {
     var dp = u.vx * dx + u.vy * dy;
 
     return {
@@ -336,7 +340,7 @@ export function getProjectVector(u, dx, dy) {
 }
 
 // 三角形面积法 
-export function isLineSegmentIntr(a, b, c, d) {
+function isLineSegmentIntr(a, b, c, d) {
     // console.log(a, b);
     var area_abc = (a.x - c.x) * (b.y - c.y) - (a.y - c.y) * (b.x - c.x);
 

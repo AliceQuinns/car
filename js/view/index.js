@@ -25,12 +25,12 @@ export default class indexUI {
 
         this._URL = {
             title: {
-                url: "https://shop.yunfanshidai.com/xcxht/racing/assets/title.png",
+                url: "https://shop.yunfanshidai.com/xcxht/racing/assets/logo.png",
                 style: {
-                    x: screenWidth / 2 - 175,
-                    y: screenHeight / 5,
-                    w: 350,
-                    h: 70
+                    x: screenWidth / 2 - 200,
+                    y: 20,
+                    w: 400,
+                    h: 150
                 }
             },
             play: {
@@ -231,7 +231,6 @@ export default class indexUI {
         let self = this;
         if (!!this._eventCallback) {
             wx.offTouchStart(this._eventCallback);
-            console.log("清空index触摸事件");
         }
 
         this._eventCallback = (e) => {
