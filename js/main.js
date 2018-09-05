@@ -108,29 +108,34 @@ export default class Main {
 
         // 赛道模型渲染
         let Ground = () => {
-            var objLoader = new THREE.OBJLoader();
-            self.logindUI.update("加载地形中...");
-            objLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
-            objLoader.load('ground.obj', function (object) {
-                object.children.forEach(function (item) {
-                    item.receiveShadow = true;
+            var mtlLoader = new THREE.MTLLoader();
+            mtlLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
+            mtlLoader.load('ground.mtl', function (materials) {
+                materials.preload();
+                var objLoader = new THREE.OBJLoader();
+                objLoader.setMaterials(materials);
+                objLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
+                objLoader.load('ground.obj', function (object) {
+
+                    object.children.forEach(function (item) {
+                        item.receiveShadow = true;
+                    });
+                    object.position.y = -5;
+                    self.scene.add(object);
+
+                    // 资源加载完毕
+                    self.logindUI.delete();
+                    self.indexUI.render();
+
+                    self.canvasPool = [self.gameCanvas, self.indexUI.canvas];// 更新画布池
+
+                    self.audio.onBGM();
+                    self.update();
+                }, function (xhr) {
+                    console.log('progress');
+                }, function () {
+                    console.log('error');
                 });
-                object.position.y = -5;
-                self.scene.add(object);
-
-                // 资源加载完毕
-                self.logindUI.delete();
-                self.indexUI.render();
-
-                self.canvasPool = [self.gameCanvas, self.indexUI.canvas];// 更新画布池
-
-                self.audio.onBGM();
-                self.update();
-
-            }, function () {
-                console.log('progress');
-            }, function () {
-                console.log('error');
             });
         }
 
@@ -178,14 +183,15 @@ export default class Main {
                 s = 0;
                 m += 1;
             }
-            ctx.game2DUI.update(`${m}:${s}:${ms}`, 12);
+            ctx.game2DUI.update(`${m}:${s}:${ms}`, Math.round(this.car.speed * 60));
+            this.score = s;
         }, 10);
         this.car.run = true;// 启动汽车
     }
 
     // 游戏结束
-    gameover = (score) => {
-        if (!!score) wx.postMessage({ type: 1, data: { score: Number(score) }, style: { top: screenHeight / 4, left: screenWidth / 4 } })
+    gameover = () => {
+        wx.postMessage({ type: 1, data: { score: Number(this.score) }, style: { top: screenHeight / 4, left: screenWidth / 4 } })
 
         this.gameoverUI.over();
         this.game2DUI.delete();

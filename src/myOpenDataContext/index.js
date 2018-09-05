@@ -146,7 +146,7 @@ function render(type, data) {
                     // 最高分
                     context.font = _SIZE.direction ? "40px Arial" : "28px Arial";
                     context.fillStyle = "#ffffff";
-                    context.fillText(`最远距离: ${myScore} 米`, _size.bg1.x + _size.bg1.w / 2, Math.round(_size.bg.y + (_SIZE.direction ? 225 : 135)));
+                    context.fillText(`最长时间: ${myScore} min`, _size.bg1.x + _size.bg1.w / 2, Math.round(_size.bg.y + (_SIZE.direction ? 225 : 135)));
                     // 头像渲染
                     itemRender(3);
                 };

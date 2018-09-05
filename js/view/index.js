@@ -240,6 +240,7 @@ export default class indexUI {
             // 开始游戏
             this.__Range({ x, y }, this._URL.play.range, () => {
                 this.parent.gamestart();
+                this.parent.audio.onTravel();
             })
 
             // 排行榜

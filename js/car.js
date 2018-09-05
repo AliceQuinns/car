@@ -10,14 +10,15 @@ export default function Car(params) {
     var mtlLoader = new THREE.MTLLoader();
     camera = params.camera;
 
-    this.speed = 0;
+    // 汽车速度变量 
+    this.speed = 0;// 实时速度
     this.rSpeed = 0;// 左右控制
     this.run = false;// 前进控制
-    this.acceleration = 0.1;
-    this.deceleration = 0.04;
-    this.maxSpeed = 2;
+    this.acceleration = 0.1;// 加速度
+    this.deceleration = 0.04;// 减速度
+    this.maxSpeed = 2;// 最大速度
 
-    this.light = params.light;
+    this.light = params.light;// 点光源
 
     this.lock = -1;
     this.isBrake = false;
@@ -31,18 +32,19 @@ export default function Car(params) {
     this.leftBack = {};
 
     // 渲染汽车模型
-    mtlLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
-    mtlLoader.load('car4.mtl', function (materials) {
+    mtlLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/car/car2/');
+    mtlLoader.load('car2.mtl', function (materials) {
         params.ctx.logindUI.update("加载汽车模型中...");
         materials.preload();
         var objLoader = new THREE.OBJLoader();
+        // console.log(materials)
         objLoader.setMaterials(materials);
-        objLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
-        objLoader.load('car4.obj', function (object) {
+        objLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/car/car2/');
+        objLoader.load('car2.obj', function (object) {
             params.ctx.logindUI.update("加载汽车材质中...");
             car = object;
             car.children.forEach(function (item) {
-                item.castShadow = true;
+                item.castShadow = true;// 渲染阴影映射
             });
             car.position.z = -20;
             car.position.y = -5;
@@ -57,27 +59,6 @@ export default function Car(params) {
         }, function () {
             console.log('error');
         });
-    });
-
-
-    // 渲染右车轮
-    self.frontRightWheel = new Wheel({
-        mtl: 'front_wheel.mtl',
-        obj: 'front_wheel.obj',
-        parent: car,
-        offsetX: 2.79475,
-        offsetZ: -3.28386,
-        scene: params.scene
-    });
-
-    // 渲染左车轮
-    self.frontLeftWheel = new Wheel({
-        mtl: 'front_wheel.mtl',
-        obj: 'front_wheel.obj',
-        parent: car,
-        offsetX: -2.79475,
-        offsetZ: -3.28386,
-        scene: params.scene
     });
 }
 
@@ -107,7 +88,7 @@ Car.prototype.tick = function () {
         }
     }
 
-    // 汽车停止
+    // 速度为零停止运动
     var speed = -this.speed;
     if (speed === 0) {
         return;
@@ -121,6 +102,7 @@ Car.prototype.tick = function () {
 
     var rotation = this.dirRotation;
 
+    // 偏航角
     if (this.isBrake) {
         this.realRotation += this.rSpeed * (this.speed / 2);
     } else {
@@ -129,20 +111,14 @@ Car.prototype.tick = function () {
         }
     }
 
+    // 移动汽车
     var speedX = Math.sin(rotation) * speed;
     var speedZ = Math.cos(rotation) * speed;
 
-
     var tempX = this.car.position.x + speedX;
     var tempZ = this.car.position.z + speedZ;
-    /* 
-    this.light.shadow.camera.left = (tempZ-50+20) >> 0;
-    this.light.shadow.camera.right = (tempZ+50+20) >> 0;
-    this.light.shadow.camera.top = (tempX+50) >> 0;
-    this.light.shadow.camera.bottom = (tempX-50) >> 0;
-    this.light.position.set(-120+tempX, 500, tempZ);
-    this.light.shadow.camera.updateProjectionMatrix();*/
 
+    // 光线移动
     this.light.position.set(-10 + tempX, 20, tempZ);
     this.light.shadow.camera.updateProjectionMatrix();
 
@@ -160,38 +136,38 @@ Car.prototype.tick = function () {
     var correctedSpeed;
     if (collisionSide > -1) {
         console.log("发生碰撞");
-        pad.gameover(12);
-        correctedSpeed = this.collision(speedX, speedZ, collisionSide);
+        pad.audio.onTohit();
+        pad.audio.onTravel("close");
+        pad.gameover();// 得分界面
 
-        speedX = correctedSpeed.vx * 5;
-        speedZ = correctedSpeed.vy * 5;
+        // 根据向量投影计算碰撞之后的速度和方向
+        // correctedSpeed = this.collision(speedX, speedZ, collisionSide);
 
-        var angle = Math.atan2(-speedZ, speedX);
+        // speedX = correctedSpeed.vx * 5;
+        // speedZ = correctedSpeed.vy * 5;
 
-        this.realRotation = -1 * (Math.PI / 2 - angle);
-        rotation = this.dirRotation = this.realRotation;
+        // var angle = Math.atan2(-speedZ, speedX);
+
+        // this.realRotation = -1 * (Math.PI / 2 - angle);
+        // rotation = this.dirRotation = this.realRotation;
 
         this.speed = 0;
         this.reset();
+
+        this.realRotation = 0; // 真实的旋转
+        this.dirRotation = 0; // 方向上的旋转
+        rotation = 0;
     }
 
 
+    // 汽车航向旋转
     this.car.rotation.y = this.realRotation;
-    this.frontLeftWheel.wrapper.rotation.y = this.realRotation;
-    this.frontRightWheel.wrapper.rotation.y = this.realRotation;
-    this.frontLeftWheel.wheel.rotation.y = (this.dirRotation - this.realRotation) / 2;
-    this.frontRightWheel.wheel.rotation.y = (this.dirRotation - this.realRotation) / 2;
 
-
+    // 移动汽车
     this.car.position.z += speedZ;
     this.car.position.x += speedX;
 
-    this.frontLeftWheel.wrapper.position.z += speedZ;
-    this.frontLeftWheel.wrapper.position.x += speedX;
-    this.frontRightWheel.wrapper.position.z += speedZ;
-    this.frontRightWheel.wrapper.position.x += speedX;
-
-
+    // 摄像机跟随
     camera.rotation.y = rotation;
     camera.position.x = this.car.position.x + Math.sin(rotation) * 20;
     camera.position.z = this.car.position.z + Math.cos(rotation) * 20;
@@ -208,6 +184,7 @@ Car.prototype.cancelBrake = function () {
     this.isBrake = false;
 };
 
+// 边界检测
 Car.prototype.physical = function () {
     var i = 0;
 
@@ -258,43 +235,6 @@ Car.prototype.collision = function (sx, sz, side) {
 
     return result;
 };
-
-// 车轮
-function Wheel(params) {
-    var mtlLoader = new THREE.MTLLoader();
-    var self = this;
-
-    mtlLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
-    mtlLoader.load(params.mtl, function (materials) {
-
-        materials.preload();
-        var objLoader = new THREE.OBJLoader();
-        objLoader.setMaterials(materials);
-        objLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
-        objLoader.load(params.obj, function (object) {
-
-            object.children.forEach(function (item) {
-                item.castShadow = true;
-            });
-            var wrapper = new THREE.Object3D();
-            wrapper.position.set(0, -5, -20);
-            wrapper.add(object);
-
-            object.position.set(params.offsetX, 0, params.offsetZ);
-
-
-            params.scene.add(wrapper);
-            self.wheel = object;
-            self.wrapper = wrapper;
-
-        }, function () {
-            console.log('progress');
-        }, function () {
-            console.log('error');
-        });
-    });
-
-}
 
 function isLeft(a, b, c) {
     return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) < 0;

@@ -533,6 +533,8 @@ THREE.MTLLoader.MaterialCreator.prototype = {
 
         if ( mapping !== undefined ) texture.mapping = mapping;
 
+        texture.minFilter = THREE.LinearFilter;
+
         return texture;
 
     }

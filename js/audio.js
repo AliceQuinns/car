@@ -44,8 +44,23 @@ export default class aduio {
     }
 
     // 加速
-    onTravel = () => {
-        this._Sound("travel");
+    onTravel = (prop) => {
+        let target = this.audiopool["travel"];
+        if (!this.status) return;
+        if (prop === "close") {
+            if (!!target) {
+                target.stop();
+                target.destroy();
+                this.audiopool["travel"] = null;
+            }
+            return;
+        };
+        if (!target) {
+            target = this._createAudio(this._url.travel);
+            this.audiopool["travel"] = target;
+            target.loop = true;
+        }
+        target.play();
     }
 
     // 金币道具
@@ -87,6 +102,7 @@ export default class aduio {
             if (!!self.audiopool["bgm"]) {
                 console.log("停止背景音乐");
                 self.audiopool["bgm"].stop();
+                if(!!self.audiopool["travel"])self.audiopool["travel"].stop();
             }
         } else if (type === "open") {
             this.status = true;
