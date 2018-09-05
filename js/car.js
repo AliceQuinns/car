@@ -16,7 +16,7 @@ export default function Car(params) {
     this.run = false;// 前进控制
     this.acceleration = 0.1;// 加速度
     this.deceleration = 0.04;// 减速度
-    this.maxSpeed = 2;// 最大速度
+    this.maxSpeed = 1.5;// 最大速度
 
     this.light = params.light;// 点光源
 

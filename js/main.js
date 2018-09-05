@@ -187,6 +187,7 @@ export default class Main {
             this.score = s;
         }, 10);
         this.car.run = true;// 启动汽车
+        this.audio.onBGM("close");
     }
 
     // 游戏结束
