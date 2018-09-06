@@ -48,10 +48,33 @@ export default class game2D {
             }
         };
         this._logindIMG();
+
+        this.init();
+    }
+
+    init() {
+        let texture = new THREE.Texture(this.canvas);
+        texture.needsUpdate = true;
+        texture.minFilter = THREE.LinearFilter;
+
+        var spriteMaterial = new THREE.SpriteMaterial({
+            map: texture
+        })
+        let sprite = new THREE.Sprite(spriteMaterial)
+        
+        sprite.scale.set(window.innerWidth / window.innerHeight, 1, 1);
+        sprite.name = "game2DUI";
+
+        this.UHD = sprite;
+        this.UHDMaterial = spriteMaterial;
     }
 
     // 绘制场景
     render = () => {
+        if (!this.Superior.scene.getObjectByName("game2DUI")) {
+            this.Superior.scene.add(this.UHD);
+        }
+
         let ctx = this._content;
 
         ctx.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio);
@@ -59,7 +82,7 @@ export default class game2D {
         this._renderIMG('btnLeft');
         this._renderIMG('btnRight');
 
-        this.update("00:00:18",12);
+        this.update("00:00:18", 12);
 
         this.event();
     }
@@ -88,6 +111,9 @@ export default class game2D {
         ctx.textAlign = "left";
         ctx.fillText(`速度:  ${speed} km/s`, 20, 70);
         ctx.restore();
+
+        // 画布更新
+        this.UHDMaterial.map.needsUpdate = true;
     }
 
     event = () => {
@@ -100,23 +126,23 @@ export default class game2D {
         wx.onTouchEnd(this.stop)
     }
 
-    // 虚拟按钮
+    
     click = (e) => {
         let x = e.changedTouches[0].clientX;
         let y = e.changedTouches[0].clientY;
 
         this.__Range({ x, y }, this._URL.btnLeft.range, () => {
-            console.log("左");
+            // console.log("左");
             this.Superior.control("left");
         })
         this.__Range({ x, y }, this._URL.btnRight.range, () => {
-            console.log("右");
+            // console.log("右");
             this.Superior.control("right");
         })
     }
 
     stop = (e) => {
-        console.log("松开");
+        // console.log("松开");
         this.Superior.control("stop");
     }
 
@@ -153,5 +179,6 @@ export default class game2D {
     delete = () => {
         wx.offTouchStart(this.click);
         this._content.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio);
+        this.Superior.scene.remove(this.UHD);
     }
 }

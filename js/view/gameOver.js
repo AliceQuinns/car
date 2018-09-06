@@ -63,10 +63,31 @@ export default class gameOverUI {
             }
         };
         this._logindIMG();
+        this.init();
+    }
+
+    init() {
+        let texture = new THREE.Texture(this.canvas);
+        texture.needsUpdate = true;
+        texture.minFilter = THREE.LinearFilter;
+
+        var spriteMaterial = new THREE.SpriteMaterial({
+            map: texture
+        })
+        let sprite = new THREE.Sprite(spriteMaterial)
+
+        sprite.scale.set(window.innerWidth / window.innerHeight, 1, 1);
+        sprite.name = "gameoverUI";
+
+        this.UHD = sprite;
+        this.UHDMaterial = spriteMaterial;
     }
 
     // 游戏结束界面
     over = () => {
+        if (!this.Superior.scene.getObjectByName("gameoverUI")) {
+            this.Superior.scene.add(this.UHD);
+        }
         let ctx = this._content;
 
         ctx.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio);
@@ -76,6 +97,14 @@ export default class gameOverUI {
         this._renderIMG('friends');
 
         this.event("over");
+
+        // 画布更新
+        window.setTimeout(() => {
+            let camera = this.Superior.camera.position
+            this.UHD.position.set(camera.x, camera.y, camera.z - 0.5);
+            this.Superior.sharedUI.render({x:camera.x, y:camera.y, z:camera.z - 0.5});
+            this.UHDMaterial.map.needsUpdate = true;
+        }, 1000);
     }
 
     event = (type) => {
@@ -101,21 +130,21 @@ export default class gameOverUI {
         // 重新开始
         this.__Range({ x, y }, this._URL.start.range, () => {
             this.delete();
-            this.Superior.canvasPool = [this.Superior.gameCanvas, this.Superior.indexUI.canvas];// 更新画布池
-            
-            this.Superior.car.car.position.set(0,-5,-20);
-            this.Superior.car.car.rotation.set(0,0,0);
-            this.Superior.camera.position.set(0,0,0);
-            this.Superior.camera.rotation.set(0,0,0);
-            this.Superior.pointLight.position.set(-10,20,-20);
-            
+            this.Superior.sharedUI.delete();
+
+            this.Superior.car.car.position.set(0, -5, -20);
+            this.Superior.car.car.rotation.set(0, 0, 0);
+            this.Superior.camera.position.set(0, 0, 0);
+            this.Superior.camera.rotation.set(0, 0, 0);
+            this.Superior.pointLight.position.set(-10, 20, -20);
+
             this.Superior.indexUI.render();
             this.Superior.audio.onBGM();
         })
 
         // 好友排行
         this.__Range({ x, y }, this._URL.friends.range, () => {
-            wx.postMessage({type: 2,style: {top: 50,left:100}})
+            wx.postMessage({ type: 2, style: { top: 50, left: 100 } })
         })
     }
 
@@ -158,5 +187,6 @@ export default class gameOverUI {
         this._content.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio);
         wx.offTouchStart(this._overCallback);
         wx.offTouchStart(this._CountdownCallback);
+        this.Superior.scene.remove(this.UHD);
     }
 }

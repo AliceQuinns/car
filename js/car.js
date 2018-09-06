@@ -135,21 +135,8 @@ Car.prototype.tick = function () {
     var collisionSide = this.physical();
     var correctedSpeed;
     if (collisionSide > -1) {
-        console.log("发生碰撞");
         pad.audio.onTohit();
         pad.audio.onTravel("close");
-        pad.gameover();// 得分界面
-
-        // 根据向量投影计算碰撞之后的速度和方向
-        // correctedSpeed = this.collision(speedX, speedZ, collisionSide);
-
-        // speedX = correctedSpeed.vx * 5;
-        // speedZ = correctedSpeed.vy * 5;
-
-        // var angle = Math.atan2(-speedZ, speedX);
-
-        // this.realRotation = -1 * (Math.PI / 2 - angle);
-        // rotation = this.dirRotation = this.realRotation;
 
         this.speed = 0;
         this.reset();
@@ -157,6 +144,8 @@ Car.prototype.tick = function () {
         this.realRotation = 0; // 真实的旋转
         this.dirRotation = 0; // 方向上的旋转
         rotation = 0;
+
+        pad.gameover();// 得分界面
     }
 
 
@@ -171,6 +160,11 @@ Car.prototype.tick = function () {
     camera.rotation.y = rotation;
     camera.position.x = this.car.position.x + Math.sin(rotation) * 20;
     camera.position.z = this.car.position.z + Math.cos(rotation) * 20;
+
+    // UHD 跟随
+    pad.game2DUI.UHD.rotation.y = rotation;
+    pad.game2DUI.UHD.position.x = this.car.position.x + Math.sin(rotation) * 19.5;
+    pad.game2DUI.UHD.position.z = this.car.position.z + Math.cos(rotation) * 19.5;
 };
 
 Car.prototype.brake = function () {

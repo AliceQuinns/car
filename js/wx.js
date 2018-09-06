@@ -1,11 +1,4 @@
 
-let screenHeight = window.innerHeight;
-let screenWidth = window.innerWidth;
-let openDataContext = wx.getOpenDataContext();
-let sharedCanvas = openDataContext.canvas;
-let ratio = wx.getSystemInfoSync().pixelRatio;
-sharedCanvas.width = screenWidth * ratio;
-sharedCanvas.height = screenHeight * ratio;
 
 GameGlobal.WxModular = {
     // 主动分享 被动分享 群分享功能

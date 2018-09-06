@@ -172,10 +172,30 @@ export default class indexUI {
                 }
             }
         };
-        this._logindIMG();// 预加载图片资源
+
+        this._logindIMG();
+
+        this.init();
     }
 
-    // 加载ICON
+    init() {
+        let texture = new THREE.Texture(this.canvas);
+        texture.needsUpdate = true;
+        texture.minFilter = THREE.LinearFilter;
+
+        var spriteMaterial = new THREE.SpriteMaterial({
+            map: texture
+        })
+        let sprite = new THREE.Sprite(spriteMaterial)
+        sprite.position.set(0, 0, -0.5);
+
+        sprite.scale.set(window.innerWidth / window.innerHeight, 1, 1);
+        sprite.name = "indexUI";
+
+        this.UHD = sprite;
+        this.UHDMaterial = spriteMaterial;
+    }
+
     _logindIMG = () => {
         for (let item in this._URL) {
             let data = this._URL[item];
@@ -187,7 +207,6 @@ export default class indexUI {
         }
     }
 
-    // 渲染ICON
     _renderIMG = (type) => {
         let target = this._URL[type];
         if (!!target.obj) {
@@ -197,6 +216,10 @@ export default class indexUI {
 
     // 绘制场景
     render = () => {
+        if (!this.parent.scene.getObjectByName("indexUI")) {
+            this.parent.scene.add(this.UHD);
+        }
+
         let ctx = this.ctx;
 
         ctx.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio);
@@ -225,6 +248,8 @@ export default class indexUI {
 
         // 绑定事件
         this.event();
+
+        this.UHDMaterial.map.needsUpdate = true;
     }
 
     event = () => {
@@ -245,17 +270,16 @@ export default class indexUI {
 
             // 排行榜
             this.__Range({ x, y }, this._URL.rank.range, () => {
-                wx.postMessage({ type: 2, style: { top: 50 ,left: 320} });
-                this.parent.canvasPool = [this.parent.gameCanvas, this.parent.indexUI.canvas, sharedCanvas];
+                wx.postMessage({ type: 2, style: { top: 50, left: 320 } });
+                this.parent.sharedUI.render({x:0,y:0,z:-0.499});
 
-                // 禁用其他按钮事件
                 wx.offTouchStart(this._eventCallback);
 
-                // 显示close按钮
                 this._renderIMG('close_btn');
 
-                // 监听close按钮事件
                 wx.onTouchStart(self.close_callback);
+
+                this.UHDMaterial.map.needsUpdate = true;
             })
 
             // 分享
@@ -277,13 +301,14 @@ export default class indexUI {
             this.__Range({ x, y }, this._URL.vioce_open.range, () => {
                 console.log('audio');
                 let status = !self.parent.audio.status;
-                if(status){
+                if (status) {
                     self.parent.audio.control("open");
                     self.parent.audio.onBGM();
                     self.render();
-                }else{
+                } else {
                     self.parent.audio.control("close");
                     this._renderIMG('vioce_close');
+                    this.UHDMaterial.map.needsUpdate = true;
                 }
             })
 
@@ -296,7 +321,7 @@ export default class indexUI {
         let x = e.changedTouches[0].clientX;
         let y = e.changedTouches[0].clientY;
         this.__Range({ x, y }, this._URL.close_btn.range, () => {
-            this.parent.canvasPool = [this.parent.gameCanvas, this.parent.indexUI.canvas];
+            this.parent.sharedUI.delete();
             wx.offTouchStart(this.close_callback);
             this.render();
         })
@@ -315,6 +340,7 @@ export default class indexUI {
     delete() {
         this.ctx.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio)
         if (!!this._eventCallback) wx.offTouchStart(this._eventCallback);
+        this.parent.scene.remove(this.UHD);
     }
 
 }

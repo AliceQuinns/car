@@ -9,15 +9,40 @@ let ratio = wx.getSystemInfoSync().pixelRatio;
 
 export default class LodingUI {
 
-    constructor() {
+    constructor(params) {
+        this.params = params;
         this.canvas = wx.createCanvas();
         this.canvas.width = screenWidth * ratio;
         this.canvas.height = screenHeight * ratio;
         this._content = this.canvas.getContext('2d');
         this._content.scale(ratio, ratio);
+
+        this.init();
+    }
+
+    init() {
+        let texture = new THREE.Texture(this.canvas);
+        texture.needsUpdate = true;
+        texture.minFilter = THREE.LinearFilter;
+
+        var spriteMaterial = new THREE.SpriteMaterial({
+            map: texture
+        })
+        let sprite = new THREE.Sprite(spriteMaterial)
+        sprite.position.set(0, 0, -0.5);
+
+        sprite.scale.set(window.innerWidth / window.innerHeight, 1, 1);
+        sprite.name = "loadingUI";
+
+        this.UHD = sprite;
+        this.UHDMaterial = spriteMaterial;
     }
 
     update(title) {
+        if(!this.params.scene.getObjectByName("loadingUI")){
+            this.params.scene.add(this.UHD);
+        }
+
         this._content.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio);
 
         // 背景渐变
@@ -55,9 +80,13 @@ export default class LodingUI {
         this._content.font = "italic small-caps bold 18px arial";
         this._content.textAlign = "center";
         this._content.fillText((!!title) ? title : this._title, screenWidth / 2, screenHeight / 1.1);
+
+        // 画布更新
+        this.UHDMaterial.map.needsUpdate = true;
     }
 
     delete() {
         this._content.clearRect(0, 0, screenWidth * ratio, screenHeight * ratio);
+        this.params.scene.remove(this.UHD);
     }
 }
