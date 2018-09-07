@@ -159,16 +159,16 @@ export default class indexUI {
             close_btn: {
                 url: "https://shop.yunfanshidai.com/xcxht/racing/assets/close.png",
                 style: {
-                    x: screenWidth / 2 - 25,
-                    y: screenHeight / 1.3,
+                    x: screenWidth * 0.8,
+                    y: screenHeight * 0.4,
                     w: 50,
                     h: 50
                 },
                 range: {
-                    startX: screenWidth / 2 - 25,
-                    startY: screenHeight / 1.3,
-                    endX: screenWidth / 2 - 25 + 50,
-                    endY: 50 + screenHeight / 1.3
+                    startX: screenWidth * 0.8,
+                    startY: screenHeight * 0.4,
+                    endX: screenWidth * 0.8 + 50,
+                    endY: 50 + screenHeight * 0.4
                 }
             }
         };
@@ -180,14 +180,14 @@ export default class indexUI {
 
     init() {
         let texture = new THREE.Texture(this.canvas);
-        texture.needsUpdate = true;
+        // texture.needsUpdate = true;
         texture.minFilter = THREE.LinearFilter;
 
         var spriteMaterial = new THREE.SpriteMaterial({
             map: texture
         })
         let sprite = new THREE.Sprite(spriteMaterial)
-        sprite.position.set(0, 0, -0.5);
+        sprite.position.set(0, 2, -0.5);
 
         sprite.scale.set(window.innerWidth / window.innerHeight, 1, 1);
         sprite.name = "indexUI";
@@ -216,6 +216,7 @@ export default class indexUI {
 
     // 绘制场景
     render = () => {
+        console.log("login");
         if (!this.parent.scene.getObjectByName("indexUI")) {
             this.parent.scene.add(this.UHD);
         }
@@ -271,7 +272,7 @@ export default class indexUI {
             // 排行榜
             this.__Range({ x, y }, this._URL.rank.range, () => {
                 wx.postMessage({ type: 2, style: { top: 50, left: 320 } });
-                this.parent.sharedUI.render({x:0,y:0,z:-0.499});
+                this.parent.sharedUI.render({ x: 0, y: 2, z: -0.499 });
 
                 wx.offTouchStart(this._eventCallback);
 
@@ -323,6 +324,7 @@ export default class indexUI {
         this.__Range({ x, y }, this._URL.close_btn.range, () => {
             this.parent.sharedUI.delete();
             wx.offTouchStart(this.close_callback);
+            wx.postMessage({ type: 6 });
             this.render();
         })
     }

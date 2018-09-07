@@ -132,9 +132,9 @@ export default class gameOverUI {
             this.delete();
             this.Superior.sharedUI.delete();
 
-            this.Superior.car.car.position.set(0, -5, -20);
+            this.Superior.car.car.position.set(0, -4, -20);
             this.Superior.car.car.rotation.set(0, 0, 0);
-            this.Superior.camera.position.set(0, 0, 0);
+            this.Superior.camera.position.set(0, 2, 0);
             this.Superior.camera.rotation.set(0, 0, 0);
             this.Superior.pointLight.position.set(-10, 20, -20);
 

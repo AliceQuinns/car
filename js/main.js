@@ -1,4 +1,4 @@
-import * as THREE from './libs/three.js'
+import * as THREE from './libs/three.min.js'
 import './base/MTLLoader.js'
 import './base/OBJLoader.js'
 
@@ -14,25 +14,54 @@ import audio from './audio.js'
 let screenHeight = window.innerHeight;
 let screenWidth = window.innerWidth;
 
+GameGlobal.THREE = THREE;
+GameGlobal.ImageBitmap = function () { }
+
 export default class Main {
+    camera = null
+    scene = null
+    renderer = null
+    light = null
+
     constructor() {
-        GameGlobal.THREE = THREE;
+        this.initRender()
+        this.initScene()
+        this.initCamera()
+        this.initLight()
+        this.render()
 
         this.indexUI = new index(this);
-        this.logindUI = new logind(this);
+        // this.logindUI = new logind(this);
         this.gameoverUI = new gameOver(this);
         this.game2DUI = new game2D(this);
         this.sharedUI = new shared(this);
-
         this.audio = new audio(this);
 
-        this.init();
-        this.global();// 调试接口
+        GameGlobal.ctx = this;
     }
 
-    init() {
-        // 场景与天空盒
-        this.scene = new THREE.Scene();
+    initRender() {
+        var renderer = new THREE.WebGLRenderer({
+            canvas: canvas,
+            antialias: true,
+            alpha: true
+        });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(screenWidth, screenHeight);
+        renderer.setClearColor(0x0077ec, 1);
+        // renderer.shadowMap.enabled = true;
+        // renderer.shadowMap.type = THREE.PCFShadowMap;
+        this.renderer = renderer;
+    }
+
+    updata() {
+        requestAnimationFrame(this.updata.bind(this));
+        this.car.tick();
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    initScene() {
+        this.scene = new THREE.Scene()
         this.scene.background = new THREE.CubeTextureLoader()
             .setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/images/skybox/')
             .load([
@@ -40,130 +69,104 @@ export default class Main {
                 'top.png', 'back.png',
                 'front.png', 'back.png'
             ]);
+    }
 
-        // 摄像机
+    initCamera() {
         this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.z = 0;
         this.camera.position.x = 0;
+        this.camera.position.y = 2;
         this.camera.speed = {
             z: 0,
             x: 0
         };
+    }
 
-        // 渲染器
-        var webGLRenderer = new THREE.WebGLRenderer({
-            canvas: canvas
-        });
-        webGLRenderer.setPixelRatio(window.devicePixelRatio);
-        webGLRenderer.setSize(screenWidth, screenHeight);
-        webGLRenderer.setClearColor(0x0077ec, 1);
-        webGLRenderer.shadowMap.enabled = true;
-        webGLRenderer.shadowMap.type = THREE.PCFShadowMap;
-        this.webGLRenderer = webGLRenderer;
+    initLight() {
+        this.light = new THREE.DirectionalLight(0xffffff)
+        this.light.position.set(20, 10, 5)
+        this.scene.add(this.light)
 
-        // 点光源
         var pointLight = new THREE.PointLight(0xccbbaa, 1, 0, 0);
         this.pointLight = pointLight;
         pointLight.position.set(-10, 20, -20);
         pointLight.castShadow = true;
         this.scene.add(pointLight);
-
-        // 环境光
-        this.light = new THREE.AmbientLight(0xccbbaa, 0.1);
-        this.scene.add(this.light);
-
-        // 加载页面
-        this.logindUI.update("正在创建3D场景...");
-
-        // 游戏对象渲染
-        this.Render();
     }
 
-    // 游戏对象
-    Render() {
+    render() {
         let self = this;
 
-        // 赛道模型渲染
-        let Ground = () => {
-            var mtlLoader = new THREE.MTLLoader();
-            mtlLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
-            mtlLoader.load('ground.mtl', function (materials) {
-                materials.preload();
-                var objLoader = new THREE.OBJLoader();
-                objLoader.setMaterials(materials);
-                objLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
-                objLoader.load('ground.obj', function (object) {
-
-                    object.children.forEach(function (item) {
-                        item.receiveShadow = true;
-                    });
-                    object.position.y = -5;
-                    self.scene.add(object);
-
-                    self.logindUI.delete();
-                    self.indexUI.render();
-
-                    self.audio.onBGM();
-                    self.update();
-
-                }, function (xhr) {
-                    console.log('progress');
-                }, function () {
-                    console.log('error');
+        // 汽车
+        var mtlLoader = new THREE.MTLLoader();
+        mtlLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/car/car2/');
+        mtlLoader.load('car2.mtl', function (material) {
+            var objLoader = new THREE.OBJLoader();
+            objLoader.setMaterials(material);
+            objLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/car/car2/');
+            objLoader.load('car2.obj', function (object) {
+                self.scene.add(object);
+                self.indexUI.render();
+                // object.children.forEach(function (item) {
+                //     item.castShadow = true;// 渲染阴影映射
+                // });
+                object.position.z = -20;
+                object.position.y = -4;
+                self.car = new Car({
+                    scene: self.scene,
+                    light: self.pointLight,
+                    camera: self.camera,
+                    ctx: self,
+                    car: object
                 });
-            });
-        }
-
-        // 汽车模型
-        this.car = new Car({
-            scene: self.scene,
-            cb: () => { self.ground = new Ground() },
-            light: self.pointLight,
-            camera: self.camera,
-            ctx: self
+                self.updata();
+                // self.logindUI.delete();
+            })
         });
 
+        // 赛道
+        var mtlLoader = new THREE.MTLLoader();
+        mtlLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
+
+        mtlLoader.load('ground.mtl', function (material) {
+            var objLoader = new THREE.OBJLoader();
+            objLoader.setMaterials(material);
+            objLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/');
+            objLoader.load('ground.obj', function (object) {
+                // object.children.forEach(function (item) {
+                //     item.receiveShadow = true;
+                // });
+                object.position.y = -5;
+                self.scene.add(object);
+
+                self.audio.onBGM();
+            })
+        });
     }
 
-    // 游戏主渲染逻辑
-    update() {
-        this.car.tick();
-        requestAnimationFrame(this.update.bind(this));
-        // this.car.car.rotateY(0.01);
-        this.webGLRenderer.render(this.scene, this.camera);
-    }
-
-    global() {
-        GameGlobal.camera = this.camera;
-        GameGlobal.scene = this.scene;
-        GameGlobal.pointLight = this.pointLight;
-        GameGlobal.ctx = this;
-        GameGlobal.audio = this.audio;
-    }
-
-    // 游戏开始
-    gamestart = () => {
-        this.indexUI.delete();
-        this.game2DUI.render();
-        let m = 0, s = 0, ms = 0;
-        if (!!this.GameTime) window.clearInterval(this.GameTime);
-        // 游戏时间与速度
-        this.GameTime = window.setInterval(() => {
-            ms += 1;
-            if (ms >= 100) {
-                ms = 0;
-                s += 1;
-            }
-            if (s >= 60) {
-                s = 0;
-                m += 1;
-            }
-            ctx.game2DUI.update(`${m}:${s}:${ms}`, Math.round(this.car.speed * 60));
-            this.score = s;
-        }, 10);
-        this.car.run = true;// 启动汽车
-        this.audio.onBGM("close");
-    }
+  // 游戏开始
+  gamestart = () => {
+    this.indexUI.delete();
+    this.game2DUI.render();
+    let m = 0, s = 0, ms = 0;
+    if (!!this.GameTime) window.clearInterval(this.GameTime);
+    // 游戏时间与速度
+    this.GameTime = window.setInterval(() => {
+      ms += 1;
+      if (ms >= 100) {
+        ms = 0;
+        s += 1;
+      }
+      if (s >= 60) {
+        s = 0;
+        m += 1;
+      }
+      // ctx.game2DUI.update(`${m}:${s}:${ms}`, Math.round(this.car.speed * 60));
+      this.score = s;
+    }, 10);
+    this.car.run = true;// 启动汽车
+    this.audio.onBGM("close");
+  }
 
     // 游戏结束
     gameover = () => {

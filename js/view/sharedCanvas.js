@@ -1,6 +1,7 @@
 export default class shared {
     constructor(params) {
         this.params = params;
+        this.time = null;// 计时器
         this.loop = false;// 渲染控制
 
         let screenHeight = window.innerHeight;
@@ -40,11 +41,11 @@ export default class shared {
 
         if(!!pos)this.UHD.position.set(pos.x, pos.y, pos.z);
         let callback = () => {
-            if(!this.loop)return;
+            if(!this.loop){window.clearInterval(this.time);return;}
             this.UHDMaterial.map.needsUpdate = true;
-            requestAnimationFrame(callback);
+            console.log(1);
         }
-        callback();
+        this.time =  window.setInterval(callback,1000);
     }
 
     delete() {

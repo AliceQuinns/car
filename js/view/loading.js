@@ -29,7 +29,7 @@ export default class LodingUI {
             map: texture
         })
         let sprite = new THREE.Sprite(spriteMaterial)
-        sprite.position.set(0, 0, -0.5);
+        sprite.position.set(0, 2, -0.5);
 
         sprite.scale.set(window.innerWidth / window.innerHeight, 1, 1);
         sprite.name = "loadingUI";

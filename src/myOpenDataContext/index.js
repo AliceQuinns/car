@@ -75,7 +75,7 @@ let init = () => {
     context.scale(scales, scales);
     getUserInfo();
     event();
-    touch();
+    // touch();
     getTimeFriend();
 }
 

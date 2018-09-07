@@ -1,13 +1,11 @@
 import outside from './base/outside.js'
-import * as THREE from './libs/three.js'
+import * as THREE from './libs/three.min.js'
 let camera;
 let pad;
 
 export default function Car(params) {
     pad = params.ctx;
-    var self = this;
-    var car;
-    var mtlLoader = new THREE.MTLLoader();
+    this.car = params.car;
     camera = params.camera;
 
     // 汽车速度变量 
@@ -30,36 +28,6 @@ export default function Car(params) {
     this.leftFront = {};
 
     this.leftBack = {};
-
-    // 渲染汽车模型
-    mtlLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/car/car2/');
-    mtlLoader.load('car2.mtl', function (materials) {
-        params.ctx.logindUI.update("加载汽车模型中...");
-        materials.preload();
-        var objLoader = new THREE.OBJLoader();
-        // console.log(materials)
-        objLoader.setMaterials(materials);
-        objLoader.setPath('https://shop.yunfanshidai.com/xcxht/racing/assets/car/car2/');
-        objLoader.load('car2.obj', function (object) {
-            params.ctx.logindUI.update("加载汽车材质中...");
-            car = object;
-            car.children.forEach(function (item) {
-                item.castShadow = true;// 渲染阴影映射
-            });
-            car.position.z = -20;
-            car.position.y = -5;
-
-            params.scene.add(car);
-            self.car = car;
-
-            params.cb();// 加载赛道
-
-        }, function (xhr) {
-            console.log('progress');
-        }, function () {
-            console.log('error');
-        });
-    });
 }
 
 Car.prototype.tick = function () {
@@ -119,8 +87,8 @@ Car.prototype.tick = function () {
     var tempZ = this.car.position.z + speedZ;
 
     // 光线移动
-    this.light.position.set(-10 + tempX, 20, tempZ);
-    this.light.shadow.camera.updateProjectionMatrix();
+    // this.light.position.set(-10 + tempX, 20, tempZ);
+    // this.light.shadow.camera.updateProjectionMatrix();
 
 
     // 碰撞检测

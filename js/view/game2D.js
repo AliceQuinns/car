@@ -61,6 +61,7 @@ export default class game2D {
             map: texture
         })
         let sprite = new THREE.Sprite(spriteMaterial)
+        sprite.position.y = 2;
         
         sprite.scale.set(window.innerWidth / window.innerHeight, 1, 1);
         sprite.name = "game2DUI";
@@ -93,24 +94,24 @@ export default class game2D {
         ctx.clearRect(0, 0, screenWidth, screenHeight / 3);
 
         // 时间
-        ctx.save();
-        ctx.fillStyle = "rgba(0,0,0,0.5)";
-        ctx.fillRect(10, 10, 150, 30);
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "italic small-caps bold 16px arial";
-        ctx.textAlign = "left";
-        ctx.fillText(`时间:  ${time}`, 20, 30);
-        ctx.restore();
+        // ctx.save();
+        // ctx.fillStyle = "rgba(0,0,0,0.5)";
+        // ctx.fillRect(10, 10, 150, 30);
+        // ctx.fillStyle = "#ffffff";
+        // ctx.font = "italic small-caps bold 16px arial";
+        // ctx.textAlign = "left";
+        // ctx.fillText(`时间:  ${time}`, 20, 30);
+        // ctx.restore();
 
         // 速度
-        ctx.save();
-        ctx.fillStyle = "rgba(0,0,0,0.5)";
-        ctx.fillRect(10, 50, 150, 30);
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "italic small-caps bold 16px arial";
-        ctx.textAlign = "left";
-        ctx.fillText(`速度:  ${speed} km/s`, 20, 70);
-        ctx.restore();
+        // ctx.save();
+        // ctx.fillStyle = "rgba(0,0,0,0.5)";
+        // ctx.fillRect(10, 50, 150, 30);
+        // ctx.fillStyle = "#ffffff";
+        // ctx.font = "italic small-caps bold 16px arial";
+        // ctx.textAlign = "left";
+        // ctx.fillText(`速度:  ${speed} km/s`, 20, 70);
+        // ctx.restore();
 
         // 画布更新
         this.UHDMaterial.map.needsUpdate = true;
